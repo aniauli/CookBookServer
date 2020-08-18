@@ -23,7 +23,7 @@ public class Server {
                     }
                     String line;
                     while((line = bufferedReader.readLine()) != null){
-                        send(clientSocket, "This is my answer for " + line);
+                        send(clientSocket, "This is my answer for " + line + System.lineSeparator());
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
