@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class Server {
     public static void main(String[] args) throws IOException {
@@ -12,14 +14,16 @@ public class Server {
 
         while(true){
             Socket clientSocket = serverSocket.accept();
+            Executor executor = Executors.newCachedThreadPool();
             Runnable runnable = () -> {
-                try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))){
+                System.out.println("New connection from: " + clientSocket);
+                 try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))){
                     if(bufferedReader.readLine().equals("hello!")){
                         System.out.println("Sb joined us...");
                     }
                     String line;
                     while((line = bufferedReader.readLine()) != null){
-                        //TODO: cos odpowiedz.
+                        send(clientSocket, "This is my answer for " + line);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -31,8 +35,12 @@ public class Server {
                     }
                 }
             };
+            executor.execute(runnable);
         }
+    }
 
+    private static void send(Socket clientSocket, String answer) throws IOException {
+        clientSocket.getOutputStream().write(answer.getBytes());
     }
 }
 
