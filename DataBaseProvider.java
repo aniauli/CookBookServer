@@ -1,8 +1,18 @@
+import javax.xml.crypto.Data;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 
 public class DataBaseProvider {
-    private final static String CREATE_TABLE_QUERY =  "CREATE TABLE products (" +
+    private final static String CREATE_TABLE_PRODUCTS =  "CREATE TABLE products (" +
+            "   id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
+            "   name VARCHAR(20) UNIQUE," +
+            "   caloriesPer100Grams DOUBLE," +
+            "   gramsPerPiece DOUBLE," +
+            "   mainIngredient VARCHAR(20)," +
+            "   CONSTRAINT primaryKey PRIMARY KEY(id, name)" +
+            "   )";
+
+    private final static String CREATE_TABLE_RECIPIES =  "CREATE TABLE products (" +
             "   id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
             "   name VARCHAR(20) UNIQUE," +
             "   caloriesPer100Grams DOUBLE," +
@@ -27,7 +37,7 @@ public class DataBaseProvider {
 
     public void createDataBase()  {
         try {
-            statement.execute(CREATE_TABLE_QUERY);
+            statement.execute(CREATE_TABLE_PRODUCTS);
         } catch (SQLException e) {
         }
     }
@@ -41,7 +51,7 @@ public class DataBaseProvider {
         }
     }
 
-    public void selectProduct() {
+    public void selectAllFromProduct() {
         try {
             String query = "SELECT id, name, caloriesPer100Grams, gramsPerPiece, mainIngredient FROM products";
             ResultSet resultSet = statement.executeQuery(query);
@@ -59,6 +69,10 @@ public class DataBaseProvider {
         }
     }
 
+    public void selectAllFromRecipe() {
+        System.out.println("dupa");
+    }
+
     public void shutDownDataBase(){
         try {
             DriverManager.getConnection("jdbc:derby:;shutdown=true");
@@ -68,5 +82,13 @@ public class DataBaseProvider {
             }
         }
     }
+
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        DataBaseProvider dataBaseProvider = new DataBaseProvider();
+        dataBaseProvider.selectAllFromProduct();
+        dataBaseProvider.selectAllFromRecipe();
+
+    }
+
 }
 
