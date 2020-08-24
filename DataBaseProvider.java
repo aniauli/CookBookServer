@@ -1,18 +1,20 @@
 import javax.xml.crypto.Data;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
+import java.util.Scanner;
 
 public class DataBaseProvider {
     private final static String CREATE_TABLE_PRODUCTS =  "CREATE TABLE products (" +
             "   id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
-            "   name VARCHAR(20) UNIQUE," +
+            "   name VARCHAR(50) UNIQUE," +
             "   caloriesPer100Grams DOUBLE," +
-            "   gramsPerPiece DOUBLE," +
+            "   gramsPerServing DOUBLE," +
+            "   caloriesPerServing DOUBLE, " +
             "   mainIngredient VARCHAR(20)," +
             "   CONSTRAINT primaryKey PRIMARY KEY(id, name)" +
             "   )";
 
-    private final static String CREATE_TABLE_RECIPIES =  "CREATE TABLE products (" +
+    private final static String CREATE_TABLE_RECIPIES =  "CREATE TABLE recipes (" +
             "   id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
             "   name VARCHAR(20) UNIQUE," +
             "   caloriesPer100Grams DOUBLE," +
@@ -23,6 +25,7 @@ public class DataBaseProvider {
 
     private Connection connection;
     private Statement statement;
+    private PreparedStatement preparedStatement;
 
     public DataBaseProvider() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
@@ -35,35 +38,75 @@ public class DataBaseProvider {
         }
     }
 
-    public void createDataBase()  {
+    public void createTableProducts()  {
         try {
             statement.execute(CREATE_TABLE_PRODUCTS);
-        } catch (SQLException e) {
+        } catch (SQLException ex) {
+            if(! "X0Y32".equals(ex.getSQLState())){
+                throw new RuntimeException(ex);
+            }
         }
     }
 
-    public void insertProduct(Product product) {
+    public void dropTableProducts() {
         try {
-            statement.execute("INSERT INTO products(name, caloriesPer100Grams, gramsPerPiece, mainIngredient)" +
-                    " VALUES ('" + product.getName() + "', "  + product.getCaloriesPer100Gram() + ", 0, 'nic')");
+            statement.execute("DROP TABLE products");
         } catch (SQLException e) {
-            //throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
-    public void selectAllFromProduct() {
+    public void dropColumn(String tableName, String columnName){
+        try{
+            statement.execute("ALTER TABLE " + tableName + " DROP COULUMN " + columnName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteRows(String tableName, String condition){
+        try{
+            statement.execute("DELETE FROM " + tableName + " WHERE " + condition);
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void insertIntoTableProduct(Product product) {
         try {
-            String query = "SELECT id, name, caloriesPer100Grams, gramsPerPiece, mainIngredient FROM products";
+            statement.execute("INSERT INTO products(name, caloriesPer100Grams, gramsPerServing, caloriesPerServing, mainIngredient)" +
+                    " VALUES ('" + product.getName() + "', " +
+                    product.getCaloriesPer100Grams() + ", " +
+                    product.getGramsPerServing() + ", " +
+                    ((product.getCaloriesPer100Grams() * product.getGramsPerServing())/100.0) + ", '" +
+                    product.getMainIngredient() + "')");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void selectAllFromTableProduct() {
+        try {
+            String query = "SELECT id, name, caloriesPer100Grams, gramsPerServing, caloriesPerServing, mainIngredient FROM products";
             ResultSet resultSet = statement.executeQuery(query);
             while(resultSet.next()){
-                System.out.printf("%-5d \t %-20s \t %-3.3f \t %-3.3f \t %-20s \n",
+                System.out.printf("%-5d \t %-50s \t %-3.2f \t %-3.2f \t %-3.2f \t %-20s \n",
                         resultSet.getInt(1),
                         resultSet.getString(2),
                         resultSet.getDouble(3),
                         resultSet.getDouble(4),
-                        resultSet.getString(5)
+                        resultSet.getDouble(5),
+                        resultSet.getString(6)
                 );
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void changeTheColumnLength(String tableName, String columnName, Integer length){
+        try {
+            statement.executeUpdate("ALTER TABLE " + tableName + " ALTER " + columnName + " SET DATA TYPE VARCHAR(" +length + ")");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -85,10 +128,10 @@ public class DataBaseProvider {
 
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         DataBaseProvider dataBaseProvider = new DataBaseProvider();
-        dataBaseProvider.selectAllFromProduct();
-        dataBaseProvider.selectAllFromRecipe();
-
+        Product product = new Product("Margaryna Smakowita z masłem", 360.0, 5.0, "Tłuszcze");
+        dataBaseProvider.insertIntoTableProduct(product);
+        dataBaseProvider.selectAllFromTableProduct();
+        dataBaseProvider.shutDownDataBase();
     }
-
 }
 
