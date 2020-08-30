@@ -1,47 +1,40 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-public class Server {
-    public static void main(String[] args) throws IOException {
-        System.out.println("The server is running ... ");
-
+public class Server
+{
+    public static void main(String[] args) throws IOException
+    {
         ServerSocket serverSocket = new ServerSocket(8080);
+        System.out.println("The server is running... ");
 
-        while(true){
-            Socket clientSocket = serverSocket.accept();
-            Executor executor = Executors.newCachedThreadPool();
-            Runnable runnable = () -> {
-                System.out.println("New connection from: " + clientSocket);
-                 try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))){
-                    if(bufferedReader.readLine().equals("hello!")){
-                        System.out.println("Sb joined us...");
-                    }
-                    String line;
-                    while((line = bufferedReader.readLine()) != null){
-                        send(clientSocket, "This is my answer for " + line + System.lineSeparator());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        clientSocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            executor.execute(runnable);
+        while (true)
+        {
+            Socket socket = null;
+
+            try
+            {
+                socket = serverSocket.accept();
+
+                System.out.println("New connection from: " + socket.getLocalAddress());
+
+                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+
+                System.out.println("Assigning new thread for client " + socket.getLocalAddress());
+
+                Thread t = new ClientHandler(socket, dataInputStream, dataOutputStream);
+
+                t.start();
+
+            }
+            catch (Exception e){
+                socket.close();
+                e.printStackTrace();
+            }
         }
     }
-
-    private static void send(Socket clientSocket, String answer) throws IOException {
-        clientSocket.getOutputStream().write(answer.getBytes());
-    }
 }
+
 

@@ -1,7 +1,5 @@
-import javax.xml.crypto.Data;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
-import java.util.Scanner;
 
 public class DataBaseProvider {
     private final static String CREATE_TABLE_PRODUCTS =  "CREATE TABLE products (" +
@@ -52,7 +50,7 @@ public class DataBaseProvider {
         try {
             statement.execute("DROP TABLE products");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Can't delete the table");
         }
     }
 
@@ -60,7 +58,7 @@ public class DataBaseProvider {
         try{
             statement.execute("ALTER TABLE " + tableName + " DROP COULUMN " + columnName);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Can't delete column " + columnName + " form " + tableName);
         }
     }
 
@@ -68,7 +66,7 @@ public class DataBaseProvider {
         try{
             statement.execute("DELETE FROM " + tableName + " WHERE " + condition);
         } catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Can't delete rows from " + tableName);
         }
     }
 
@@ -81,7 +79,7 @@ public class DataBaseProvider {
                     ((product.getCaloriesPer100Grams() * product.getGramsPerServing())/100.0) + ", '" +
                     product.getMainIngredient() + "')");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Can't insert this product. Error: " + e.getMessage());
         }
     }
 
@@ -100,7 +98,7 @@ public class DataBaseProvider {
                 );
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Can't view all products from table Products");
         }
     }
 
