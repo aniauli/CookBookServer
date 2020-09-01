@@ -63,7 +63,7 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
             if(resultSet.next()) {
                 result = String.format("%s;%s;%s;%s", resultSet.getString(2),
                         resultSet.getDouble(3), resultSet.getDouble(4),
-                        resultSet.getDouble(5));
+                        resultSet.getString(5));
             }
             return result;
         } catch (SQLException e) {
@@ -72,15 +72,17 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
         }
     }
 
-    public void insertIntoTable(Product product) {
+    public boolean insertIntoTable(Product product) {
         try {
             statement.execute("INSERT INTO products(name, caloriesPer100Grams, gramsPerServing," +
                     " mainIngredient)" + "VALUES ('" + product.getName() + "', " +
                     product.getCaloriesPer100Grams() + ", " +
-                    product.getGramsPerServing() + ", " +
+                    product.getGramsPerServing() + ", '" +
                     product.getMainIngredient() + "')");
+            return true;
         } catch (SQLException e) {
             System.out.println("Can't insert this product. Error: " + e.getMessage());
+            return false;
         }
     }
 }
