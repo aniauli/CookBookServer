@@ -18,17 +18,6 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
     }
 
     @Override
-    void createTable() {
-        try {
-            statement.execute(CREATE_TABLE_PRODUCTS);
-        } catch (SQLException ex) {
-            if (!"X0Y32".equals(ex.getSQLState())) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
-    @Override
     void selectAllFromTable() {
         try {
             String query = "SELECT id, name, caloriesPer100Grams, gramsPerServing, " +

@@ -5,8 +5,6 @@ public class Product {
     private Double gramsPerServing;
     private String mainIngredient;
 
-    public Product(){}
-
     public Product(String name, double caloriesPer100Gram, double gramsPerServing, String mainIngredient) {
         this.name = name;
         this.caloriesPer100Grams = caloriesPer100Gram;

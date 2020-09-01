@@ -42,11 +42,9 @@ public class ClientHandler extends Thread {
                         received = dataInputStream.readUTF();
                         if (checkIfProduct(received)) {
                             Product receivedProduct = createProduct(received);
-                            if(dataBaseProviderForProducts.insertIntoTable(receivedProduct)) {
-                                dataOutputStream.writeUTF("Product added");
-                            }
+                            dataOutputStream.writeUTF(resultOfAddingProductToDataBase(receivedProduct));
                         } else {
-                            dataOutputStream.writeUTF("Cannot add product");
+                            dataOutputStream.writeUTF("Błąd! Nie udało się dodać produktu. Sprawdź, czy poprawnie uzupełniłeś wszystkie dane.");
                         }
                         break;
 
@@ -55,7 +53,7 @@ public class ClientHandler extends Thread {
                         break;
                 }
             } catch (IOException e) {
-                System.out.println("Error in while: " + e.getMessage());
+                System.out.println("Client disconnected: " + e.getMessage());
                 if (e.getMessage().equals("Connection reset")) {
                     break;
                 }
@@ -109,5 +107,19 @@ public class ClientHandler extends Thread {
         Product receivedProduct = new Product(splittedProduct[0], Double.parseDouble(splittedProduct[1]),
                 Double.parseDouble(splittedProduct[2]), splittedProduct[3]);
         return receivedProduct;
+    }
+
+    private String resultOfAddingProductToDataBase(Product receivedProduct) throws IOException {
+        if (isThereSuchProductInTable(receivedProduct)) {
+            return "Podany produkt już jest w bazie danych";
+        }
+        if (dataBaseProviderForProducts.insertIntoTable(receivedProduct)) {
+            return "Pomyślnie dodano produkt do bazy";
+        }
+        return "Bład serwera! Nie udało się dodać produktu do bazy.";
+    }
+
+    private boolean isThereSuchProductInTable(Product receivedProduct) {
+        return dataBaseProviderForProducts.checkIfTheNameOfItemExistsInTable(receivedProduct.getName(), "products");
     }
 }

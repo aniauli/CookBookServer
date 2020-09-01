@@ -3,15 +3,6 @@ import java.sql.*;
 
 abstract class DataBaseProvider {
 
-    private final static String CREATE_TABLE_RECIPIES =  "CREATE TABLE recipes (" +
-            "   id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
-            "   name VARCHAR(20) UNIQUE," +
-            "   caloriesPer100Grams DOUBLE," +
-            "   gramsPerPiece DOUBLE," +
-            "   mainIngredient VARCHAR(20)," +
-            "   CONSTRAINT primaryKey PRIMARY KEY(id, name)" +
-            "   )";
-
     private Connection connection;
     protected Statement statement;
 
@@ -34,13 +25,22 @@ abstract class DataBaseProvider {
         statement = connection.createStatement();
     }
 
-    abstract void createTable();
+    protected void createTable(String createTableStatement) {
+        try {
+            statement.execute(createTableStatement);
+        } catch (SQLException ex) {
+            System.out.println("Can't create the table: " + ex.getMessage());
+            if (!"X0Y32".equals(ex.getSQLState())) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
 
     protected void dropTable(String tableName) {
         try {
             statement.execute("DROP TABLE " + tableName);
         } catch (SQLException e) {
-            System.out.println("Can't delete the table");
+            System.out.println("Can't delete the table: " + e.getMessage());
         }
     }
 
@@ -57,6 +57,37 @@ abstract class DataBaseProvider {
             statement.execute("DELETE FROM " + tableName + " WHERE " + condition);
         } catch (SQLException e){
             System.out.println("Can't delete rows from " + tableName);
+        }
+    }
+
+    protected boolean checkIfTheNameOfItemExistsInTable(String itemName, String tableName){
+        try {
+            String query = "SELECT name FROM " + tableName + " WHERE name LIKE '" + itemName + "'";
+            ResultSet resultSet = statement.executeQuery(query);
+            String result = "null";
+            if(resultSet.next()) {
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            System.out.println("Can't check if the product exists in table: " + tableName + " -> " + e.getMessage());
+            return false;
+        }
+    }
+
+    public void addColumn(String tableName, String columnName, String dataType) {
+        try {
+            statement.execute("ALTER TABLE " + tableName + " ADD " + columnName + " " + dataType);
+        } catch (SQLException e) {
+            System.out.println("Can't add column " + columnName + " to table " + tableName + " : " + e.getMessage());
+        }
+    }
+
+    public void updateTable(String tableName, String afterSet){
+        try {
+            statement.execute("UPDATE " + tableName + " SET " + afterSet );
+        } catch (SQLException e) {
+            System.out.println("Can't update " + tableName + " : " + e.getMessage());
         }
     }
 
