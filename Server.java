@@ -9,6 +9,7 @@ public class Server
         ServerSocket serverSocket = new ServerSocket(8080);
         System.out.println("The server is running... ");
 
+
         while (true)
         {
             Socket socket = null;

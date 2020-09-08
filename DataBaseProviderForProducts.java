@@ -52,8 +52,6 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
 
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         DataBaseProviderForProducts dataBaseProviderForProducts = new DataBaseProviderForProducts();
-        Product product = new Product("Papryczka chilli", 40.0, 20, "Węglowodany");
-        dataBaseProviderForProducts.insertIntoTable(product);
         System.out.println(dataBaseProviderForProducts.selectAllNamesFromTable("products"));
         dataBaseProviderForProducts.shutDownDataBase();
     }

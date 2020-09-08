@@ -3,26 +3,17 @@ import java.sql.*;
 
 abstract class DataBaseProvider {
 
+   private static final String URL = "jdbc:mysql://localhost:3306/cookbook";
     private Connection connection;
     protected Statement statement;
 
-    public DataBaseProvider() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException, InstantiationException {
-        Class.forName("org.apache.derby.jdbc.EmbeddedDriver").getDeclaredConstructor().newInstance();
-        connectToDataBase("jdbc:derby:dbName; create=true");
-    }
-
-    private void connectToDataBase(String url) {
+    public DataBaseProvider() {
         try {
-            connection = DriverManager.getConnection(url);
-            createStatement();
+            connection = DriverManager.getConnection(URL, "root", "");
+            statement = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void createStatement() throws SQLException {
-        statement = connection.createStatement();
     }
 
     protected void createTable(String createTableStatement) {
@@ -93,11 +84,12 @@ abstract class DataBaseProvider {
 
     public String selectAllNamesFromTable(String tableName){
         try {
-            String query = "SELECT id, name FROM " + tableName;
+            String query = "SELECT id, name, instructions FROM " + tableName;
             ResultSet resultSet = statement.executeQuery(query);
             StringBuilder result = new StringBuilder();
             while (resultSet.next()) {
-                result.append(String.format("%s;%s;", resultSet.getInt(1), resultSet.getString(2)));
+                result.append(String.format("%s;%s;%s", resultSet.getInt(1), resultSet.getString(2),
+                        resultSet.getString(3)));
             }
             return result.toString();
         } catch (SQLException ex) {

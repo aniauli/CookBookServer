@@ -73,4 +73,9 @@ public class DataBaseProviderForRecipes extends DataBaseProvider {
         }
     }
 
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        DataBaseProviderForRecipes dataBaseProviderFordataBaseProviderForRecipes = new DataBaseProviderForRecipes();
+        System.out.println(dataBaseProviderFordataBaseProviderForRecipes.selectAllNamesFromTable("recipes"));
+        dataBaseProviderFordataBaseProviderForRecipes.shutDownDataBase();
+    }
 }
