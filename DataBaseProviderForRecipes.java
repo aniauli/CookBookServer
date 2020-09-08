@@ -16,42 +16,34 @@ public class DataBaseProviderForRecipes extends DataBaseProvider {
     }
 
     @Override
-    void selectAllFromTable() {
-        try {
-            String query = "SELECT id, name, instructions, meal FROM recipes";
-            ResultSet resultSet = statement.executeQuery(query);
-            while(resultSet.next()){
-                printAllFromTable(resultSet);
-            }
-        } catch (SQLException e) {
-            System.out.println("Can't view all products from table recipes: " + e.getMessage());
-        }
-    }
-
-    @Override
-    void printAllFromTable(ResultSet resultSet) throws SQLException {
-        System.out.printf("%-5d \t %-50s \t %-300s \t %-50s \n",
-                resultSet.getInt(1),
-                resultSet.getString(2),
-                resultSet.getString(3),
-                resultSet.getString(4)
-        );
-    }
-
-    @Override
     String findInTable(String itemToFind) {
         try {
-            String query = "SELECT id, name, instructions, meal FROM products WHERE name LIKE '" + itemToFind + "'";
+            String query = "SELECT id, name, instructions, meal FROM recipes WHERE name LIKE '" + itemToFind + "'";
             ResultSet resultSet = statement.executeQuery(query);
             String result = "null";
             if(resultSet.next()) {
                 result = String.format("%s;%s;%s", resultSet.getString(2),
-                        resultSet.getDouble(3), resultSet.getString(4));
+                        resultSet.getString(3), resultSet.getString(4));
             }
             return result;
         } catch (SQLException e) {
             System.out.println("Can't find products from table recipes: " + e.getMessage());
             return "SQL Error";
+        }
+    }
+
+    public Integer findIdInTable(String recipe){
+        try {
+            String query = "SELECT id FROM recipes WHERE name LIKE '" + recipe + "'";
+            ResultSet resultSet = statement.executeQuery(query);
+            Integer result = 0;
+            if(resultSet.next()) {
+                result = Integer.parseInt(resultSet.getString(1));
+            }
+            return result;
+        } catch (SQLException e) {
+            System.out.println("Can't find products from table recipes: " + e.getMessage());
+            return 0;
         }
     }
 
@@ -66,11 +58,19 @@ public class DataBaseProviderForRecipes extends DataBaseProvider {
         }
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, InstantiationException, IllegalAccessException {
-        DataBaseProviderForRecipes dataBaseProviderForRecipes = new DataBaseProviderForRecipes();
-        dataBaseProviderForRecipes.selectAllFromTable();
-        dataBaseProviderForRecipes.shutDownDataBase();
+    public String selectAllNamesFromTableInCondition(String tableName, String condition){
+        try {
+            String query = "SELECT name FROM " + tableName + " WHERE meal = '" + condition + "' ORDER BY name";
+            ResultSet resultSet = statement.executeQuery(query);
+            StringBuilder result = new StringBuilder();
+            while (resultSet.next()) {
+                result.append(String.format("%s;", resultSet.getString(1)));
+            }
+            return result.toString();
+        } catch (SQLException ex) {
+            System.out.println("Can't return all names from table: " + ex.getMessage());
+            return "null";
+        }
     }
 
 }

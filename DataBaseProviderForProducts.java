@@ -18,31 +18,6 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
     }
 
     @Override
-    void selectAllFromTable() {
-        try {
-            String query = "SELECT id, name, caloriesPer100Grams, gramsPerServing, " +
-                    "mainIngredient FROM products";
-            ResultSet resultSet = statement.executeQuery(query);
-            while(resultSet.next()){
-                printAllFromTable(resultSet);
-            }
-        } catch (SQLException e) {
-            System.out.println("Can't view all products from table Products: " + e.getMessage());
-        }
-    }
-
-    @Override
-    void printAllFromTable(ResultSet resultSet) throws SQLException {
-        System.out.printf("%-5d \t %-50s \t %-3.2f \t %-3.2f \t %-20s \n",
-                resultSet.getInt(1),
-                resultSet.getString(2),
-                resultSet.getDouble(3),
-                resultSet.getDouble(4),
-                resultSet.getString(5)
-        );
-    }
-
-    @Override
     String findInTable(String itemToFind) {
         try {
             String query = "SELECT id, name, caloriesPer100Grams, gramsPerServing, " +
@@ -73,5 +48,13 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
             System.out.println("Can't insert this product. Error: " + e.getMessage());
             return false;
         }
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        DataBaseProviderForProducts dataBaseProviderForProducts = new DataBaseProviderForProducts();
+        Product product = new Product("Papryczka chilli", 40.0, 20, "Węglowodany");
+        dataBaseProviderForProducts.insertIntoTable(product);
+        System.out.println(dataBaseProviderForProducts.selectAllNamesFromTable("products"));
+        dataBaseProviderForProducts.shutDownDataBase();
     }
 }

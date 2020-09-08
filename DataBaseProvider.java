@@ -91,8 +91,21 @@ abstract class DataBaseProvider {
         }
     }
 
-    abstract void selectAllFromTable();
-    abstract void printAllFromTable(ResultSet resultSet) throws SQLException;
+    public String selectAllNamesFromTable(String tableName){
+        try {
+            String query = "SELECT id, name FROM " + tableName;
+            ResultSet resultSet = statement.executeQuery(query);
+            StringBuilder result = new StringBuilder();
+            while (resultSet.next()) {
+                result.append(String.format("%s;%s;", resultSet.getInt(1), resultSet.getString(2)));
+            }
+            return result.toString();
+        } catch (SQLException ex) {
+            System.out.println("Can't return all names from table: " + ex.getMessage());
+            return "null";
+        }
+    }
+
     abstract String findInTable(String itemToFind);
 
     public void shutDownDataBase(){
