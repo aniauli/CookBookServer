@@ -1,24 +1,16 @@
-import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DataBaseProviderForRecipes extends DataBaseProvider {
 
-    public final static String CREATE_TABLE_RECIPES =  "CREATE TABLE recipes (" +
-            "   id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
-            "   name VARCHAR(50) UNIQUE," +
-            "   instructions VARCHAR(1000)," +
-            "   CONSTRAINT recipePrimaryKey PRIMARY KEY(id, name)" +
-            "   )";
-
-    public DataBaseProviderForRecipes() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException, InstantiationException {
+    public DataBaseProviderForRecipes(Connection connection) throws SQLException {
+        super(connection);
     }
 
-    @Override
-    String findInTable(String itemToFind) {
+    String showItemInfo(String itemToFind) {
         try {
-            String query = "SELECT id, name, instructions, meal FROM recipes WHERE name LIKE '" + itemToFind + "'";
+            String query = "SELECT id_recipe, name, instructions, meal FROM recipes WHERE name LIKE '" + itemToFind + "'";
             ResultSet resultSet = statement.executeQuery(query);
             String result = "null";
             if(resultSet.next()) {
@@ -32,9 +24,9 @@ public class DataBaseProviderForRecipes extends DataBaseProvider {
         }
     }
 
-    public Integer findIdInTable(String recipe){
+    public Integer findRecipeId(String recipe){
         try {
-            String query = "SELECT id FROM recipes WHERE name LIKE '" + recipe + "'";
+            String query = "SELECT id_recipe FROM recipes WHERE name LIKE '" + recipe + "'";
             ResultSet resultSet = statement.executeQuery(query);
             Integer result = 0;
             if(resultSet.next()) {
@@ -47,10 +39,11 @@ public class DataBaseProviderForRecipes extends DataBaseProvider {
         }
     }
 
-    public boolean insertIntoTable(Recipe recipe) {
+    public boolean addRecipe(Recipe recipe) {
         try {
-            statement.execute("INSERT INTO recipes(name, instructions)" + "VALUES ('" +
-                    recipe.getName() + "', '" + recipe.getInstructions() + "')");
+            statement.execute("INSERT INTO recipes(name, instructions, meal)" + "VALUES ('" +
+                    recipe.getName() + "', '" + recipe.getInstructions() + "', '" + recipe.getMeal() + "')");
+            System.out.println("Dodano do recipes");
             return true;
         } catch (SQLException e) {
             System.out.println("Can't insert this product. Error: " + e.getMessage());
@@ -58,9 +51,9 @@ public class DataBaseProviderForRecipes extends DataBaseProvider {
         }
     }
 
-    public String selectAllNamesFromTableInCondition(String tableName, String condition){
+    public String selectAllNamesInMealGroup(String mealGroup){
         try {
-            String query = "SELECT name FROM " + tableName + " WHERE meal = '" + condition + "' ORDER BY name";
+            String query = "SELECT name FROM recipes WHERE meal = '" + mealGroup + "' ORDER BY name";
             ResultSet resultSet = statement.executeQuery(query);
             StringBuilder result = new StringBuilder();
             while (resultSet.next()) {
@@ -71,11 +64,5 @@ public class DataBaseProviderForRecipes extends DataBaseProvider {
             System.out.println("Can't return all names from table: " + ex.getMessage());
             return "null";
         }
-    }
-
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        DataBaseProviderForRecipes dataBaseProviderFordataBaseProviderForRecipes = new DataBaseProviderForRecipes();
-        System.out.println(dataBaseProviderFordataBaseProviderForRecipes.selectAllNamesFromTable("recipes"));
-        dataBaseProviderFordataBaseProviderForRecipes.shutDownDataBase();
     }
 }

@@ -1,31 +1,19 @@
-import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DataBaseProviderForProductsInRecipes extends DataBaseProvider {
 
-    public final static String CREATE_TABLE_PRODUCTSINRECIPES = "CREATE TABLE productsInRecipes (" +
-            "   idRecipe INTEGER," +
-            "   idProduct INTEGER," +
-            "   productInGrams DOUBLE," +
-            "   CONSTRAINT productsInRecipiesPrimaryKey PRIMARY KEY(idRecipe, idProduct) " +
-            "   )";
-
-
-    public DataBaseProviderForProductsInRecipes() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException, InstantiationException {
+    public DataBaseProviderForProductsInRecipes(Connection connection) throws SQLException {
+        super(connection);
     }
 
-    @Override
-    String findInTable(String itemToFind) {
-        return null;
-    }
-
-
-    public boolean insertIntoTable(Integer idRecipe, Integer idProduct, Double productInGrams) {
+    public boolean addProductInRecipe(Integer idRecipe, Integer idProduct, Double productInGrams) {
         try {
-            statement.execute("INSERT INTO productsInRecipes (idRecipe, idProduct, productInGrams)" + "VALUES (" +
+            statement.execute("INSERT INTO productsInRecipes (id_recipe, id_product, productInGrams)" + "VALUES (" +
                     idRecipe + ", " + idProduct + ", " + productInGrams + ")");
+            System.out.println("Dodano do productsInRecipes");
             return true;
         } catch (SQLException e) {
             System.out.println("Can't insert this product. Error: " + e.getMessage());
@@ -33,9 +21,9 @@ public class DataBaseProviderForProductsInRecipes extends DataBaseProvider {
         }
     }
 
-    public String selectAllNamesFromTable(String tableName){
+    public String selectAllNamesFromTable(String tableName) {
         try {
-            String query = "SELECT idRecipe, idProduct, productInGrams FROM " + tableName;
+            String query = "SELECT id_recipe, id_product, productInGrams FROM " + tableName;
             ResultSet resultSet = statement.executeQuery(query);
             StringBuilder result = new StringBuilder();
             while (resultSet.next()) {
@@ -49,14 +37,14 @@ public class DataBaseProviderForProductsInRecipes extends DataBaseProvider {
         }
     }
 
-    public String findProductsWithGramsInRecipe(Integer idRecipe, String findWhat){
+    public String findProductsWithGramsInRecipe(Integer idRecipe, String findWhat) {
         try {
-            String query = "SELECT " + findWhat +" FROM products " +
-                    "JOIN productsInRecipes ON products.id = " +
-                    "productsInRecipes.idProduct WHERE productsInRecipes.idRecipe = " + idRecipe + "ORDER BY products.name";
+            String query = "SELECT " + findWhat + " FROM products " +
+                    "JOIN productsInRecipes ON products.id_product = " +
+                    "productsInRecipes.id_product WHERE productsInRecipes.id_recipe = " + idRecipe + " ORDER BY products.name";
             ResultSet resultSet = statement.executeQuery(query);
             StringBuilder result = new StringBuilder();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 result.append(String.format("%s;", resultSet.getString(1)));
             }
             return result.toString();
@@ -64,12 +52,5 @@ public class DataBaseProviderForProductsInRecipes extends DataBaseProvider {
             System.out.println("Can't find products from table productsInRecipes: " + e.getMessage());
             return "SQL Error";
         }
-    }
-
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        DataBaseProviderForProductsInRecipes dataBaseProviderForProductsInRecipes = new DataBaseProviderForProductsInRecipes();
-        dataBaseProviderForProductsInRecipes.insertIntoTable(3, 33, 20.0);
-        System.out.println(dataBaseProviderForProductsInRecipes.selectAllNamesFromTable("productsInRecipes"));
-        dataBaseProviderForProductsInRecipes.shutDownDataBase();
     }
 }

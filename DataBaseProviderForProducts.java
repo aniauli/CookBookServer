@@ -1,26 +1,16 @@
-import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DataBaseProviderForProducts extends DataBaseProvider{
 
-    private final static String CREATE_TABLE_PRODUCTS =  "CREATE TABLE products (" +
-            "   id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
-            "   name VARCHAR(50) UNIQUE," +
-            "   caloriesPer100Grams DOUBLE," +
-            "   gramsPerServing DOUBLE," +
-            "   mainIngredient VARCHAR(20)," +
-            "   CONSTRAINT primaryKey PRIMARY KEY(id, name)" +
-            "   )";
-
-    public DataBaseProviderForProducts() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, 
-            InvocationTargetException, InstantiationException {
+    public DataBaseProviderForProducts(Connection connection) throws SQLException {
+        super(connection);
     }
 
-    @Override
-    String findInTable(String itemToFind) {
+    String showItemInfo(String itemToFind) {
         try {
-            String query = "SELECT id, name, caloriesPer100Grams, gramsPerServing, " +
+            String query = "SELECT id_product, name, caloriesPer100Grams, gramsPerServing, " +
                     "mainIngredient FROM products WHERE name LIKE '" + itemToFind + "'";
             ResultSet resultSet = statement.executeQuery(query);
             String result = "null";
@@ -31,12 +21,27 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
             }
             return result;
         } catch (SQLException e) {
-            System.out.println("Can't find products from table Products: " + e.getMessage());
+            System.out.println("Can't find products from table products: " + e.getMessage());
             return "SQL Error";
         }
     }
 
-    public boolean insertIntoTable(Product product) {
+    public Integer findProductId(String productName){
+        try {
+            String query = "SELECT id_product FROM products WHERE name LIKE '" + productName + "'";
+            ResultSet resultSet = statement.executeQuery(query);
+            Integer result = 0;
+            if(resultSet.next()) {
+                result = Integer.parseInt(resultSet.getString(1));
+            }
+            return result;
+        } catch (SQLException e) {
+            System.out.println("Can't find products from table recipes: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    public boolean addProduct(Product product) {
         try {
             statement.execute("INSERT INTO products(name, caloriesPer100Grams, gramsPerServing," +
                     " mainIngredient)" + "VALUES ('" + product.getName() + "', " +
@@ -50,9 +55,4 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
         }
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        DataBaseProviderForProducts dataBaseProviderForProducts = new DataBaseProviderForProducts();
-        System.out.println(dataBaseProviderForProducts.selectAllNamesFromTable("products"));
-        dataBaseProviderForProducts.shutDownDataBase();
-    }
 }
