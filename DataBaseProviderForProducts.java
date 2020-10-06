@@ -30,7 +30,7 @@ public class DataBaseProviderForProducts extends DataBaseProvider{
         try {
             String query = "SELECT id_product FROM products WHERE name LIKE '" + productName + "'";
             ResultSet resultSet = statement.executeQuery(query);
-            Integer result = 0;
+            int result = 0;
             if(resultSet.next()) {
                 result = Integer.parseInt(resultSet.getString(1));
             }

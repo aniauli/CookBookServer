@@ -9,7 +9,6 @@ public class ClientHandler extends Thread {
 
     final DataInputStream dataInputStream;
     final DataOutputStream dataOutputStream;
-    final Socket socket;
     final Connection connection;
 
     private DataBaseProviderForProducts dataBaseProviderForProducts;
@@ -18,8 +17,7 @@ public class ClientHandler extends Thread {
     private DataBaseProviderForUsers dataBaseProviderForUsers;
     private DataBaseProviderForUsersRecipes dataBaseProviderForUsersRecipes;
 
-    ClientHandler(Socket socket, DataInputStream dataInputStream, DataOutputStream dataOutputStream, Connection connection) throws SQLException {
-        this.socket = socket;
+    ClientHandler(DataInputStream dataInputStream, DataOutputStream dataOutputStream, Connection connection) throws SQLException {
         this.dataInputStream = dataInputStream;
         this.dataOutputStream = dataOutputStream;
         this.connection = connection;
@@ -142,7 +140,7 @@ public class ClientHandler extends Thread {
                         break;
                 }
             } catch (IOException e) {
-                System.out.println("Client " + socket.getLocalAddress() + " disconnected: " + e.getMessage());
+                System.out.println("Client disconnected: " + e.getMessage());
                 if (e.getMessage().equals("Connection reset")) {
                     break;
                 }

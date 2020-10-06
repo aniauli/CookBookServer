@@ -32,7 +32,7 @@ public class Server
 
                 System.out.println("Assigning new thread for client " + socket.getLocalAddress());
 
-                Thread t = new ClientHandler(socket, dataInputStream, dataOutputStream, dataBaseInitialization.getConnection());
+                Thread t = new ClientHandler(dataInputStream, dataOutputStream, dataBaseInitialization.getConnection());
 
                 t.start();
 
