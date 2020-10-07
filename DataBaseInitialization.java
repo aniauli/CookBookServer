@@ -21,6 +21,7 @@ class DataBaseInitialization {
         if (connectWithMySql && mySqlBaseExists()) {
             System.out.println("Connected to MySql database.");
             mySqlCreateTablesWithSamples();
+            mySqlCreateStoredProcedures();
         } else {
             System.out.println("Connected to ApacheDerby database.");
             createApacheBase();
@@ -53,6 +54,12 @@ class DataBaseInitialization {
         fillTable(statementText("MySqlFillTableProductsInRecipes"), statement);
         fillTable(statementText("MySqlFillTableUsers"), statement);
         fillTable(statementText("MySqlFillTableUsersRecipes"), statement);
+    }
+
+    private void mySqlCreateStoredProcedures() throws SQLException, IOException {
+        Statement statement = this.connection.createStatement();
+
+        createStoredProcedure(statementText("MySqlCreateAddProductInRecipeStoredProcedure"), statement);
     }
 
     private void apacheCreateTablesWithSamples() throws SQLException, IOException {
@@ -103,6 +110,14 @@ class DataBaseInitialization {
             statement.execute(fillTableStatement);
         } catch (SQLException ex) {
             System.out.println("Can't fill the table: " + ex.getMessage());
+        }
+    }
+
+    private void createStoredProcedure(String createStoredProcedureStatement, Statement statement) {
+        try {
+            statement.execute(createStoredProcedureStatement);
+        } catch (SQLException ex) {
+            System.out.println("Can't create stored procedure: " + ex.getMessage());
         }
     }
 

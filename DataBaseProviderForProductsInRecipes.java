@@ -1,7 +1,4 @@
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DataBaseProviderForProductsInRecipes extends DataBaseProvider {
 
@@ -11,29 +8,21 @@ public class DataBaseProviderForProductsInRecipes extends DataBaseProvider {
 
     public boolean addProductInRecipe(Integer idRecipe, Integer idProduct, Double productInGrams) {
         try {
-            statement.execute("INSERT INTO productsInRecipes (id_recipe, id_product, productInGrams)" + "VALUES (" +
-                    idRecipe + ", " + idProduct + ", " + productInGrams + ")");
+            CallableStatement callableStatement = null;
+            String SQL = "{call addProductInRecipe (?, ?, ?)}";
+
+            callableStatement = connection.prepareCall(SQL);
+            callableStatement.setInt(1, idRecipe);
+            callableStatement.setInt(2, idProduct);
+            callableStatement.setDouble(3, productInGrams);
+
+            callableStatement.execute();
+
             System.out.println("Dodano do productsInRecipes");
             return true;
         } catch (SQLException e) {
             System.out.println("Can't insert this product. Error: " + e.getMessage());
             return false;
-        }
-    }
-
-    public String selectAllNamesFromTable(String tableName) {
-        try {
-            String query = "SELECT id_recipe, id_product, productInGrams FROM " + tableName;
-            ResultSet resultSet = statement.executeQuery(query);
-            StringBuilder result = new StringBuilder();
-            while (resultSet.next()) {
-                result.append(String.format("%s;%s;%s", resultSet.getInt(1), resultSet.getString(2),
-                        resultSet.getString(3)));
-            }
-            return result.toString();
-        } catch (SQLException ex) {
-            System.out.println("Can't return all names from table: " + ex.getMessage());
-            return "null";
         }
     }
 
