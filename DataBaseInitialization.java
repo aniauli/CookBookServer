@@ -12,36 +12,27 @@ class DataBaseInitialization {
 
     private static final String URL = "jdbc:mysql://localhost:3306/cookbook";
     private Connection connection;
-    private boolean connectWithMySql = true;
 
     public DataBaseInitialization() {}
 
-    public void setUpConnection() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException,
-            IllegalAccessException, SQLException, IOException {
-        if (connectWithMySql && mySqlBaseExists()) {
+    public void setUpConnection() throws SQLException, IOException {
+        if (mySqlBaseExists()) {
             System.out.println("Connected to MySql database.");
             mySqlCreateTablesWithSamples();
             mySqlCreateStoredProcedures();
         } else {
-            System.out.println("Connected to ApacheDerby database.");
-            createApacheBase();
-            apacheCreateTablesWithSamples();
-        }
-    }
-
-    private void createApacheBase() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException, InstantiationException {
-
-        Class.forName("org.apache.derby.jdbc.EmbeddedDriver").getDeclaredConstructor().newInstance();
-        try {
-            this.connection = DriverManager.getConnection("jdbc:derby:dbCookBook; create=true");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println("Can't connect to data base");
         }
     }
 
     private void mySqlCreateTablesWithSamples() throws SQLException, IOException {
         Statement statement = this.connection.createStatement();
+
+        statement.execute("DROP TABLE IF EXISTS usersrecipes");
+        statement.execute("DROP TABLE IF EXISTS users");
+        statement.execute("DROP TABLE IF EXISTS productsinrecipes");
+        statement.execute("DROP TABLE IF EXISTS recipes");
+        statement.execute("DROP TABLE IF EXISTS products");
 
         createTable(statementText("MySqlCreateTableProducts"), statement);
         createTable(statementText("MySqlCreateTableRecipes"), statement);
@@ -59,29 +50,15 @@ class DataBaseInitialization {
     private void mySqlCreateStoredProcedures() throws SQLException, IOException {
         Statement statement = this.connection.createStatement();
 
+        statement.execute("DROP PROCEDURE IF EXISTS addProductInRecipe");
+        statement.execute("DROP PROCEDURE IF EXISTS findProductsInRecipe");
+        statement.execute("DROP PROCEDURE IF EXISTS findGramsInRecipe");
+        statement.execute("DROP PROCEDURE IF EXISTS findCaloriesInRecipe");
+
         createStoredProcedure(statementText("MySqlCreateAddProductInRecipeStoredProcedure"), statement);
-    }
-
-    private void apacheCreateTablesWithSamples() throws SQLException, IOException {
-        Statement statement = this.connection.createStatement();
-
-        statement.execute("DROP TABLE usersrecipes");
-        statement.execute("DROP TABLE users");
-        statement.execute("DROP TABLE productsinrecipes");
-        statement.execute("DROP TABLE recipes");
-        statement.execute("DROP TABLE products");
-
-        createTable(statementText("ApacheCreateTableProducts"), statement);
-        createTable(statementText("ApacheCreateTableRecipes"), statement);
-        createTable(statementText("ApacheCreateTableProductsInRecipes"), statement);
-        createTable(statementText("ApacheCreateTableUsers"), statement);
-        createTable(statementText("ApacheCreateTableUsersRecipes"), statement);
-
-        fillTable(statementText("ApacheFillTableProducts"), statement);
-        fillTable(statementText("ApacheFillTableRecipes"), statement);
-        fillTable(statementText("ApacheFillTableProductsInRecipes"), statement);
-        fillTable(statementText("ApacheFillTableUsers"), statement);
-        fillTable(statementText("ApacheFillTableUsersRecipes"), statement);
+        createStoredProcedure(statementText("MySqlCreateFindProductsInRecipeStoredProcedure"), statement);
+        createStoredProcedure(statementText("MySqlCreateFindGramsInRecipeStoredProcedure"), statement);
+        createStoredProcedure(statementText("MySqlCreateFindCaloriesInRecipeStoredProcedure"), statement);
     }
 
     private boolean mySqlBaseExists() {

@@ -26,19 +26,42 @@ public class DataBaseProviderForProductsInRecipes extends DataBaseProvider {
         }
     }
 
-    public String findProductsWithGramsInRecipe(Integer idRecipe, String findWhat) {
+    public String findProductsInRecipe(Integer idRecipe) {
+        return findInRecipe(idRecipe, "products");
+    }
+
+    public String findGramsInRecipe(Integer idRecipe) {
+        return findInRecipe(idRecipe, "grams");
+    }
+
+    public String findCaloriesInRecipe(Integer idRecipe) {
+        return findInRecipe(idRecipe, "calories");
+    }
+
+    public String findInRecipe(Integer idRecipe, String findWhat) {
         try {
-            String query = "SELECT " + findWhat + " FROM products " +
-                    "JOIN productsInRecipes ON products.id_product = " +
-                    "productsInRecipes.id_product WHERE productsInRecipes.id_recipe = " + idRecipe + " ORDER BY products.name";
-            ResultSet resultSet = statement.executeQuery(query);
+            CallableStatement callableStatement = null;
+            String SQL = null;
+
+            if(findWhat.equals("products")) {
+                SQL = "{call findProductsInRecipe (?)}";
+            } else if(findWhat.equals("grams")) {
+                SQL = "{call findGramsInRecipe (?)}";
+            } else {
+                SQL = "{call findCaloriesInRecipe (?)}";
+            }
+
+            callableStatement = connection.prepareCall(SQL);
+            callableStatement.setInt(1, idRecipe);
+
+            ResultSet resultSet = callableStatement.executeQuery();
             StringBuilder result = new StringBuilder();
             while (resultSet.next()) {
                 result.append(String.format("%s;", resultSet.getString(1)));
             }
             return result.toString();
         } catch (SQLException e) {
-            System.out.println("Can't find products from table productsInRecipes: " + e.getMessage());
+            System.out.println("Can't find " + findWhat + " from table productsInRecipes: " + e.getMessage());
             return "SQL Error";
         }
     }

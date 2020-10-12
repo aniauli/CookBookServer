@@ -220,9 +220,9 @@ public class ClientHandler extends Thread {
             return "null";
         }
         Integer idRecipe = dataBaseProviderForRecipes.findRecipeId(received);
-        String products = dataBaseProviderForProductsInRecipes.findProductsWithGramsInRecipe(idRecipe, "products.name");
-        String grams = dataBaseProviderForProductsInRecipes.findProductsWithGramsInRecipe(idRecipe, "productsInRecipes.productInGrams");
-        String calories = dataBaseProviderForProductsInRecipes.findProductsWithGramsInRecipe(idRecipe, "products.caloriesPer100Grams");
+        String products = dataBaseProviderForProductsInRecipes.findProductsInRecipe(idRecipe);
+        String grams = dataBaseProviderForProductsInRecipes.findGramsInRecipe(idRecipe);
+        String calories = dataBaseProviderForProductsInRecipes.findCaloriesInRecipe(idRecipe);
         return recipe + "!" + products + "!" + grams + "!" + calories;
     }
 
